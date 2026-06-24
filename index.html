@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pharmconsult — Conseil en Industrie Pharmaceutique</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #FFFFFF;
+      --surface:      #F4F8FC;
+      --surface-2:    #E8F0F8;
+      --teal:         #007EA3;
+      --teal-mid:     #00A0C8;
+      --teal-light:   #00B4D8;
+      --teal-dim:     rgba(0,126,163,.07);
+      --teal-border:  rgba(0,126,163,.2);
+      --navy:         #0B3069;
+      --text:         #0A1628;
+      --text-muted:   #58718A;
+      --text-dim:     #B0C4D8;
+      --border:       rgba(0,30,70,.09);
+      --shadow:       0 2px 20px rgba(0,30,70,.07);
+      --shadow-md:    0 8px 40px rgba(0,30,70,.10);
+      --max:          1300px;
+      --nav-h:        80px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* top accent line */
+    body::before {
+      content: '';
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 3px; z-index: 1001;
+      background: linear-gradient(to right, var(--navy), var(--teal-light));
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 2px; }
+
+    /* ── NAV ── */
+    #navbar {
+      position: fixed; top: 3px; left: 0; right: 0; z-index: 1000;
+      height: var(--nav-h);
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow .35s;
+    }
+    #navbar.scrolled {
+      box-shadow: 0 2px 20px rgba(0,30,70,.08);
+    }
+    .nav-inner {
+      max-width: var(--max); margin: 0 auto; padding: 0 40px;
+      height: 100%; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { text-decoration: none; display: flex; align-items: center; }
+    .nav-logo img { height: 78px; width: auto; object-fit: contain; mix-blend-mode: multiply; }
+
+    .nav-links { display: flex; gap: 4px; align-items: center; }
+    .nav-item { position: relative; }
+    .nav-lnk {
+      display: block; padding: 8px 14px;
+      text-decoration: none; color: var(--text-muted);
+      font-size: .7rem; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+      transition: color .3s; white-space: nowrap; position: relative;
+    }
+    .nav-lnk::after {
+      content: ''; position: absolute; bottom: 4px; left: 14px;
+      width: 0; height: 2px; background: var(--teal); transition: width .3s;
+    }
+    .nav-lnk:hover, .nav-lnk.active { color: var(--teal); }
+    .nav-lnk:hover::after, .nav-lnk.active::after { width: calc(100% - 28px); }
+    .nav-lnk .arr { display: inline-block; margin-left: 3px; font-size: .55rem; opacity: .5; transition: transform .3s; }
+    .nav-item:hover .nav-lnk .arr { transform: rotate(180deg); }
+
+    /* dropdown */
+    .nav-drop {
+      position: absolute; top: calc(100% + 4px); left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: white; border: 1px solid var(--border);
+      min-width: 280px; padding: 8px 0;
+      opacity: 0; visibility: hidden;
+      transition: opacity .25s, transform .25s, visibility .25s;
+      box-shadow: var(--shadow-md); z-index: 200;
+    }
+    .nav-item:hover .nav-drop {
+      opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+    }
+    .nav-drop a {
+      display: flex; align-items: center; gap: 14px; padding: 12px 20px;
+      text-decoration: none; color: var(--text-muted); font-size: .75rem;
+      letter-spacing: .06em; transition: color .2s, background .2s;
+    }
+    .nav-drop a:hover { color: var(--teal); background: var(--teal-dim); }
+    .drop-n { font-family: 'Cormorant Garamond', serif; font-size: .95rem; color: var(--teal); font-weight: 500; flex-shrink: 0; width: 24px; }
+
+    /* burger */
+    .burger { display: none; background: none; border: none; padding: 10px; cursor: pointer; flex-direction: column; gap: 5px; touch-action: manipulation; }
+    .burger span { display: block; width: 24px; height: 2px; background: var(--navy); transition: all .3s; border-radius: 2px; }
+
+    /* mobile menu */
+    .mob-menu { display: none; position: fixed; inset: 0; background: white; z-index: 1002; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 0 24px; }
+    .mob-menu.open { display: flex; }
+    .mob-menu a { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 7vw, 2.5rem); font-weight: 300; letter-spacing: .04em; color: var(--text); text-decoration: none; transition: color .3s; text-align: center; width: 100%; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .mob-menu a:last-child { border-bottom: none; }
+    .mob-menu a:hover, .mob-menu a:active { color: var(--teal); }
+    .mob-close { position: absolute; top: 24px; right: 24px; background: none; border: none; color: var(--navy); font-size: 2rem; cursor: pointer; line-height: 1; padding: 8px; touch-action: manipulation; }
+
+    /* ── HERO ── */
+    .hero { position: relative; min-height: 100vh; display: flex; align-items: center; overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; }
+    .hero-bg img {
+      width: 100%; height: 100%; object-fit: cover; object-position: center 30%;
+      transform: scale(1.06); transition: transform 9s ease;
+    }
+    .hero.ready .hero-bg img { transform: scale(1); }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(105deg,
+        rgba(8,24,56,.62) 0%,
+        rgba(8,24,56,.42) 55%,
+        rgba(8,24,56,.18) 100%);
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: var(--max); margin: 0 auto; padding: 0 48px;
+      padding-top: var(--nav-h);
+    }
+    .hero-label {
+      display: flex; align-items: center; gap: 16px;
+      font-size: .62rem; letter-spacing: .28em; text-transform: uppercase;
+      color: var(--teal-light); margin-bottom: 28px;
+      opacity: 0; animation: fadeUp .8s ease .3s forwards;
+    }
+    .hero-label::before { content: ''; display: block; width: 36px; height: 1px; background: var(--teal-light); }
+    .hero-h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(4.5rem, 11vw, 10rem);
+      font-weight: 300; line-height: .92; color: #fff; margin-bottom: 36px;
+      opacity: 0; animation: fadeUp .8s ease .5s forwards;
+    }
+    .hero-h1 em { font-style: italic; color: var(--teal-light); }
+    .hero-sub {
+      font-size: 1.05rem; color: rgba(255,255,255,.82); max-width: 520px;
+      line-height: 1.85; font-weight: 300; margin-bottom: 52px;
+      opacity: 0; animation: fadeUp .8s ease .7s forwards;
+    }
+    .hero-cta {
+      display: flex; gap: 24px; align-items: center; flex-wrap: wrap;
+      opacity: 0; animation: fadeUp .8s ease .9s forwards;
+    }
+    .btn-teal {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--teal); color: white; text-decoration: none;
+      padding: 16px 40px; font-size: .72rem; font-weight: 500;
+      letter-spacing: .16em; text-transform: uppercase; transition: all .35s;
+      position: relative; overflow: hidden; border: none; cursor: pointer; font-family: inherit;
+    }
+    .btn-teal::before {
+      content: ''; position: absolute; inset: 0; background: var(--navy);
+      transform: scaleX(0); transform-origin: right; transition: transform .4s ease;
+    }
+    .btn-teal:hover::before { transform: scaleX(1); transform-origin: left; }
+    .btn-teal span { position: relative; z-index: 1; }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: rgba(255,255,255,.85); text-decoration: none; font-size: .72rem;
+      font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,.4); padding-bottom: 2px;
+      transition: color .3s, border-color .3s;
+    }
+    .btn-ghost:hover { color: var(--teal-light); border-color: var(--teal-light); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 10px;
+      color: var(--teal); text-decoration: none; font-size: .72rem;
+      font-weight: 500; letter-spacing: .14em; text-transform: uppercase;
+      border: 1px solid var(--teal-border); padding: 14px 32px;
+      transition: all .3s;
+    }
+    .btn-outline:hover { background: var(--teal); color: white; }
+    .hero-scroll {
+      position: absolute; bottom: 48px; left: 48px;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      opacity: 0; animation: fadeUp .8s ease 1.2s forwards;
+    }
+    .hero-scroll span { font-size: .58rem; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.7); writing-mode: vertical-rl; }
+    .scroll-line { width: 1px; height: 64px; background: linear-gradient(to bottom, var(--teal), transparent); animation: pulse 2s ease infinite; }
+    .hero-decade {
+      position: absolute; bottom: 40px; right: 48px;
+      font-family: 'Cormorant Garamond', serif; font-size: 7rem;
+      font-weight: 300; color: rgba(11,48,105,.06); line-height: 1; pointer-events: none;
+      opacity: 0; animation: fadeIn 1s ease 1.6s forwards;
+    }
+
+    /* ── MARQUEE ── */
+    .marquee-band {
+      background: var(--navy); overflow: hidden;
+      padding: 16px 0;
+    }
+    .marquee-track { display: flex; gap: 0; white-space: nowrap; animation: marquee 40s linear infinite; }
+    .marquee-item { display: inline-flex; align-items: center; gap: 28px; padding: 0 28px; font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.55); }
+    .marquee-dot { width: 3px; height: 3px; background: var(--teal-light); border-radius: 50%; flex-shrink: 0; }
+
+    /* ── SHARED ── */
+    .sec-label {
+      display: flex; align-items: center; gap: 12px;
+      font-size: .6rem; letter-spacing: .3em; text-transform: uppercase;
+      color: var(--teal); margin-bottom: 22px; font-weight: 500;
+    }
+    .sec-label::before { content: ''; display: block; width: 28px; height: 2px; background: var(--teal); flex-shrink: 0; }
+    .sec-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.6rem, 4.5vw, 4rem);
+      font-weight: 400; line-height: 1.1; color: var(--navy);
+    }
+    .sec-title em { font-style: italic; color: var(--teal); }
+    .divider { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--border); }
+
+    /* ── À PROPOS ── */
+    .about { padding: 140px 0; position: relative; background: var(--bg); }
+    .about-inner {
+      max-width: var(--max); margin: 0 auto; padding: 0 48px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: center;
+    }
+    .about-text .sec-title { margin-bottom: 28px; }
+    .about-text p { color: var(--text-muted); font-size: .98rem; line-height: 1.9; font-weight: 300; margin-bottom: 18px; }
+    .about-text p:last-of-type { margin-bottom: 38px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px; }
+    .tag {
+      padding: 6px 14px; border: 1px solid var(--teal-border);
+      font-size: .65rem; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--teal); font-weight: 500; transition: all .3s; background: transparent;
+    }
+    .tag:hover { background: var(--teal); color: white; }
+    .stats-row { display: grid; grid-template-columns: repeat(3,1fr); border: 1px solid var(--border); }
+    .stat { padding: 28px 20px; border-right: 1px solid var(--border); text-align: center; }
+    .stat:last-child { border-right: none; }
+    .stat-n { display: block; font-family: 'Cormorant Garamond', serif; font-size: 3.2rem; font-weight: 400; color: var(--teal); line-height: 1; margin-bottom: 8px; }
+    .stat-l { font-size: .63rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); font-weight: 400; }
+    .about-visual { position: relative; border-left: 2px solid var(--teal-border); padding-left: 36px; }
+    .about-img-wrap { position: relative; overflow: hidden; aspect-ratio: 3/4; }
+    .about-img-wrap img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.92); transition: transform 7s ease; }
+    .about-visual:hover .about-img-wrap img { transform: scale(1.04); }
+    .img-caption {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,.94); backdrop-filter: blur(12px);
+      padding: 18px 24px; border-left: 3px solid var(--teal);
+    }
+    .img-caption .sub { font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+    .img-caption .name { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 500; color: var(--navy); margin-top: 4px; }
+
+    /* ── EXPERTISE INDUSTRIELLE ── */
+    .exp-indus { padding: 140px 0; background: var(--surface); position: relative; }
+    .exp-inner { max-width: var(--max); margin: 0 auto; padding: 0 48px; }
+    .exp-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 72px; }
+    .exp-head-r { font-size: .88rem; color: var(--text-muted); max-width: 300px; text-align: right; line-height: 1.85; font-weight: 300; }
+    .cards-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .card {
+      background: white; overflow: hidden; position: relative;
+      box-shadow: var(--shadow); border: 1px solid var(--border);
+      transition: box-shadow .3s, transform .3s;
+    }
+    .card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
+    .card-img { aspect-ratio: 16/10; overflow: hidden; position: relative; }
+    .card-img img { width: 100%; height: 100%; object-fit: cover; filter: brightness(.88); transition: filter .6s, transform .6s; }
+    .card:hover .card-img img { filter: brightness(.95); transform: scale(1.04); }
+    .card-img-grad { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(255,255,255,.6) 100%); }
+    .card-num {
+      position: absolute; top: 14px; left: 18px;
+      font-family: 'Cormorant Garamond', serif; font-size: .8rem;
+      color: white; font-weight: 500; letter-spacing: .1em;
+      background: var(--teal); padding: 3px 10px;
+    }
+    .card-body { padding: 24px 28px 28px; }
+    .card-tag { display: inline-block; font-size: .58rem; letter-spacing: .2em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; font-weight: 500; }
+    .card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 400; line-height: 1.2; color: var(--navy); margin-bottom: 12px; }
+    .card-desc { font-size: .83rem; color: var(--text-muted); line-height: 1.85; font-weight: 300; }
+    .card-items { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .card-item { display: flex; align-items: flex-start; gap: 12px; font-size: .78rem; color: var(--text-muted); font-weight: 300; }
+    .card-item::before { content: ''; display: block; width: 14px; height: 1px; background: var(--teal); margin-top: 10px; flex-shrink: 0; }
+    .card-foot { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .card-link { font-size: .67rem; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: gap .3s; font-weight: 500; }
+    .card-link:hover { gap: 18px; }
+
+    /* ── EXPERTISE BPDO ── */
+    .exp-bpdo { padding: 140px 0; background: var(--bg); position: relative; }
+    .bpdo-inner { max-width: var(--max); margin: 0 auto; padding: 0 48px; }
+    .bpdo-head { margin-bottom: 72px; }
+    .bpdo-feature { display: grid; grid-template-columns: 1fr 1fr; gap: 0; box-shadow: var(--shadow-md); border: 1px solid var(--border); }
+    .bpdo-img { position: relative; overflow: hidden; min-height: 400px; }
+    .bpdo-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.88); transition: transform 7s ease; }
+    .bpdo-feature:hover .bpdo-img img { transform: scale(1.04); }
+    .bpdo-img-overlay { position: absolute; inset: 0; background: linear-gradient(to right, transparent 50%, rgba(255,255,255,.7) 100%); }
+    .bpdo-img-label {
+      position: absolute; bottom: 28px; left: 28px;
+      background: rgba(255,255,255,.94); backdrop-filter: blur(10px);
+      padding: 14px 20px; border-left: 3px solid var(--teal);
+    }
+    .bpdo-img-label span { font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--teal); font-weight: 500; }
+    .bpdo-img-label div { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 400; color: var(--navy); margin-top: 4px; }
+    .bpdo-content { background: var(--surface); padding: 56px 56px 56px 64px; display: flex; flex-direction: column; justify-content: center; }
+    .bpdo-content .offer-badge { display: inline-flex; align-items: center; gap: 10px; font-size: .6rem; letter-spacing: .25em; text-transform: uppercase; color: var(--teal); margin-bottom: 20px; font-weight: 500; }
+    .bpdo-content .offer-badge::before { content: ''; display: block; width: 22px; height: 2px; background: var(--teal); }
+    .bpdo-content h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 3vw, 2.8rem); font-weight: 400; line-height: 1.2; color: var(--navy); margin-bottom: 20px; }
+    .bpdo-content h2 em { font-style: italic; color: var(--teal); }
+    .bpdo-content p { font-size: .9rem; color: var(--text-muted); line-height: 1.9; font-weight: 300; margin-bottom: 28px; }
+    .bpdo-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 36px; }
+    .bpdo-list-item { display: flex; align-items: flex-start; gap: 14px; font-size: .84rem; color: var(--text-muted); font-weight: 300; }
+    .bpdo-list-item::before { content: ''; display: block; width: 16px; height: 1px; background: var(--teal); margin-top: 11px; flex-shrink: 0; }
+
+    /* ── HISTOIRE ── */
+    .histoire { padding: 140px 0; background: var(--surface); position: relative; }
+    .histoire-inner { max-width: var(--max); margin: 0 auto; padding: 0 48px; }
+    .histoire-head { text-align: center; margin-bottom: 96px; }
+    .histoire-head .sec-label { justify-content: center; }
+    .histoire-head .sec-label::before { display: none; }
+    .histoire-head p { font-size: 1rem; color: var(--text-muted); max-width: 560px; margin: 24px auto 0; line-height: 1.9; font-weight: 300; }
+    .timeline { position: relative; padding-left: 88px; }
+    .timeline::before {
+      content: ''; position: absolute; top: 16px; bottom: 16px; left: 28px; width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--teal-border) 8%, var(--teal-border) 92%, transparent);
+    }
+    .tl-item { position: relative; margin-bottom: 80px; display: grid; grid-template-columns: 160px 1fr; gap: 56px; align-items: start; }
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-dot { position: absolute; left: -88px; top: 16px; width: 13px; height: 13px; border: 2px solid var(--teal); background: white; transform: rotate(45deg); }
+    .tl-dot::after { content: ''; position: absolute; inset: 2px; background: var(--teal); }
+    .tl-year { font-family: 'Cormorant Garamond', serif; font-size: 5rem; font-weight: 300; color: rgba(11,48,105,.09); line-height: 1; transition: color .4s; padding-top: 4px; }
+    .tl-item:hover .tl-year { color: rgba(11,48,105,.22); }
+    .tl-body { padding-top: 12px; }
+    .tl-title { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 400; color: var(--navy); margin-bottom: 12px; line-height: 1.3; }
+    .tl-text { font-size: .9rem; color: var(--text-muted); line-height: 1.9; font-weight: 300; max-width: 600px; }
+
+    /* ── CONTACT ── */
+    .contact { padding: 140px 0; background: var(--surface-2); position: relative; }
+    .contact::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(rgba(0,126,163,.07) 1px, transparent 1px); background-size: 28px 28px; }
+    .contact-inner { position: relative; z-index: 1; max-width: var(--max); margin: 0 auto; padding: 0 48px; display: grid; grid-template-columns: 1fr 1fr; gap: 100px; align-items: start; }
+    .contact-l, .contact-form { min-width: 0; }
+    .contact-l .sec-title { margin-bottom: 26px; }
+    .contact-l > p { font-size: 1rem; color: var(--text-muted); line-height: 1.9; font-weight: 300; margin-bottom: 40px; }
+    .contact-info { display: flex; flex-direction: column; gap: 20px; }
+    .c-item { display: flex; align-items: center; gap: 18px; }
+    .c-icon { width: 42px; height: 42px; border: 1px solid var(--teal-border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: white; }
+    .c-icon svg { color: var(--teal); }
+    .c-txt { font-size: .85rem; color: var(--text-muted); font-weight: 300; }
+    .c-txt strong { display: block; color: var(--text); font-weight: 500; font-size: .9rem; margin-bottom: 2px; }
+    .c-txt a { color: var(--teal); text-decoration: none; font-weight: 500; }
+    .c-txt a:hover { text-decoration: underline; }
+    .contact-form { display: flex; flex-direction: column; gap: 16px; background: white; padding: 40px; border: 1px solid var(--border); box-shadow: var(--shadow); width: 100%; min-width: 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .f-group { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+    .f-group label { font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; color: var(--teal); font-weight: 500; }
+    .f-group input, .f-group textarea, .f-group select {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      padding: 13px 16px; font-family: 'DM Sans', sans-serif; font-size: .9rem; font-weight: 300;
+      outline: none; transition: border-color .3s; appearance: none; -webkit-appearance: none;
+      width: 100%; box-sizing: border-box;
+    }
+    .f-group input::placeholder, .f-group textarea::placeholder { color: var(--text-dim); }
+    .f-group input:focus, .f-group textarea:focus, .f-group select:focus { border-color: var(--teal); background: white; }
+    .f-group textarea { height: 120px; resize: vertical; }
+    .sel-wrap { position: relative; }
+    .sel-wrap::after { content: ''; position: absolute; right: 16px; top: 50%; transform: translateY(-60%) rotate(45deg); width: 7px; height: 7px; border-right: 1.5px solid var(--teal); border-bottom: 1.5px solid var(--teal); pointer-events: none; }
+
+    /* ── FOOTER ── */
+    footer { max-width: var(--max); margin: 0 auto; padding: 48px 48px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); }
+    .f-logo img { height: 36px; width: auto; object-fit: contain; opacity: .7; transition: opacity .3s; }
+    .f-logo img:hover { opacity: 1; }
+    .f-copy { font-size: .72rem; color: var(--text-dim); font-weight: 300; }
+    .f-links { display: flex; gap: 28px; }
+    .f-links a { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--text-dim); text-decoration: none; transition: color .3s; }
+    .f-links a:hover { color: var(--teal); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(26px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scaleY(1); } 50% { opacity:.3; transform:scaleY(.6); } }
+    @keyframes marquee { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity .85s ease, transform .85s ease; }
+    .reveal.in { opacity:1; transform:translateY(0); }
+    .d1 { transition-delay:.1s; } .d2 { transition-delay:.2s; }
+    .d3 { transition-delay:.3s; } .d4 { transition-delay:.4s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:1100px) {
+      .about-inner { grid-template-columns:1fr; gap:56px; }
+      .about-visual { order:-1; border-left:none; padding-left:0; }
+      .about-img-wrap { aspect-ratio:16/9; }
+      .cards-grid { grid-template-columns:1fr 1fr; }
+      .bpdo-feature { grid-template-columns:1fr; }
+      .bpdo-img { min-height:320px; }
+      .bpdo-img-overlay { background:linear-gradient(to bottom,transparent 50%,rgba(255,255,255,.8) 100%); }
+      .bpdo-content { padding:40px 36px; }
+      .contact-inner { grid-template-columns:1fr; gap:56px; }
+      .tl-item { grid-template-columns:120px 1fr; gap:32px; }
+      .tl-year { font-size:3.8rem; }
+    }
+
+    @media (max-width:900px) {
+      .nav-links { display:none; }
+      .burger { display:flex; }
+      .nav-inner,.about-inner,.exp-inner,.bpdo-inner,.histoire-inner,.contact-inner,footer { padding-left:24px; padding-right:24px; }
+      .hero-content { padding-left:24px; padding-right:24px; }
+      .hero-scroll { left:24px; }
+      .hero-decade { display:none; }
+      .cards-grid { grid-template-columns:1fr; }
+      .tl-item { grid-template-columns:1fr; gap:0; }
+      .tl-year { font-size:2.8rem; margin-bottom:-12px; }
+      .timeline { padding-left:52px; }
+      .timeline::before { left:18px; }
+      .tl-dot { left:-52px; }
+      .form-row { grid-template-columns:1fr; }
+      footer { flex-direction:column; gap:22px; text-align:center; }
+      .exp-head { flex-direction:column; align-items:flex-start; gap:20px; }
+      .exp-head-r { text-align:left; }
+      .about,.exp-indus,.exp-bpdo,.histoire,.contact { padding-top:90px; padding-bottom:90px; }
+      .contact-form { padding:28px 24px; }
+    }
+
+    @media (max-width:600px) {
+      :root { --nav-h:64px; }
+
+      /* Navbar */
+      .nav-logo img { height:52px; }
+
+      /* Hero */
+      .hero { min-height:100dvh; }
+      .hero-content { padding-top:calc(var(--nav-h) + 12px); }
+      .hero-h1 { font-size:clamp(2.6rem,12vw,3.6rem); line-height:1; margin-bottom:18px; }
+      .hero-label { font-size:.54rem; letter-spacing:.16em; margin-bottom:16px; }
+      .hero-sub { font-size:.92rem; max-width:100%; margin-bottom:30px; }
+      .hero-cta { flex-direction:column; align-items:stretch; gap:12px; }
+      .btn-teal { justify-content:center; padding:15px 24px; touch-action:manipulation; }
+      .btn-ghost { justify-content:center; text-align:center; touch-action:manipulation; }
+      .hero-scroll { display:none; }
+
+      /* Section spacing */
+      .about,.exp-indus,.exp-bpdo,.histoire,.contact { padding-top:60px; padding-bottom:60px; }
+      .nav-inner,.about-inner,.exp-inner,.bpdo-inner,.histoire-inner,.contact-inner,footer { padding-left:20px; padding-right:20px; }
+      .hero-content { padding-left:20px; padding-right:20px; }
+      .exp-head,.bpdo-head { margin-bottom:40px; }
+      .histoire-head { margin-bottom:52px; }
+
+      /* Typography */
+      .sec-title { font-size:clamp(1.9rem,7vw,2.4rem); }
+
+      /* À Propos */
+      .about-img-wrap { aspect-ratio:4/3; }
+      .stats-row { grid-template-columns:1fr 1fr; }
+      .stat:nth-child(2) { border-right:none; }
+      .stat:last-child { grid-column:1 / -1; border-top:1px solid var(--border); }
+      .stat-n { font-size:2.4rem; }
+      .stat { padding:20px 14px; }
+
+      /* Cards */
+      .card-body { padding:16px 16px 20px; }
+      .card-title { font-size:1.35rem; }
+
+      /* BPDO */
+      .bpdo-img { min-height:210px; }
+      .bpdo-content { padding:28px 20px; }
+      .bpdo-content h2 { font-size:1.75rem; }
+      .bpdo-list-item { font-size:.8rem; }
+      .bpdo-img-label { bottom:14px; left:14px; padding:10px 12px; }
+      .bpdo-img-label div { font-size:1rem; }
+
+      /* Timeline */
+      .timeline { padding-left:34px; }
+      .timeline::before { left:9px; }
+      .tl-dot { left:-34px; width:10px; height:10px; }
+      .tl-year { font-size:1.9rem; }
+      .tl-title { font-size:1.25rem; }
+      .tl-text { font-size:.84rem; }
+      .tl-item { margin-bottom:44px; }
+
+      /* Contact */
+      .contact-form { padding:20px 16px; }
+
+      /* Footer */
+      footer { padding:28px 20px; gap:16px; }
+      .f-logo img { height:28px; }
+      .f-links { gap:14px; flex-wrap:wrap; justify-content:center; }
+
+      /* Tags */
+      .tags { gap:6px; }
+      .tag { font-size:.6rem; padding:5px 10px; }
+    }
+
+    @media (max-width:380px) {
+      .hero-h1 { font-size:2.4rem; }
+      .sec-title { font-size:1.8rem; }
+      .stats-row { grid-template-columns:1fr; }
+      .stat { border-right:none; border-top:1px solid var(--border); }
+      .stat:first-child { border-top:none; }
+      .stat:last-child { grid-column:auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile overlay -->
+  <div class="mob-menu" id="mob">
+    <button class="mob-close" id="mobClose">×</button>
+    <a href="#accueil"               class="mob-lnk">Accueil</a>
+    <a href="#a-propos"              class="mob-lnk">À Propos</a>
+    <a href="#expertise-industrielle" class="mob-lnk">Expertise Industrielle</a>
+    <a href="#expertise-bpdo"        class="mob-lnk">Expertise BPDO</a>
+    <a href="#contact"               class="mob-lnk">Contact</a>
+  </div>
+
+  <!-- ── NAV ── -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#accueil" class="nav-logo">
+        <img src="logo.png" alt="Pharmconsult — Conseil Pharmaceutique">
+      </a>
+
+      <div class="nav-links">
+        <div class="nav-item">
+          <a href="#a-propos" class="nav-lnk" data-s="a-propos">À Propos</a>
+        </div>
+        <div class="nav-item">
+          <a href="#expertise-industrielle" class="nav-lnk" data-s="expertise-industrielle">
+            Expertise Industrielle <span class="arr">▾</span>
+          </a>
+          <div class="nav-drop">
+            <a href="#expertise-industrielle"><span class="drop-n">01</span>SMQ &amp; Audits Qualité</a>
+            <a href="#expertise-industrielle"><span class="drop-n">02</span>Gestion des Risques &amp; Data Integrity</a>
+            <a href="#expertise-industrielle"><span class="drop-n">03</span>Formation &amp; Accompagnement</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <a href="#expertise-bpdo" class="nav-lnk" data-s="expertise-bpdo">
+            Expertise BPDO <span class="arr">▾</span>
+          </a>
+          <div class="nav-drop">
+            <a href="#expertise-bpdo"><span class="drop-n">01</span>Pharmacien Responsable Remplaçant</a>
+          </div>
+        </div>
+        <div class="nav-item">
+          <a href="#contact" class="nav-lnk" data-s="contact">Contact</a>
+        </div>
+      </div>
+
+      <button class="burger" id="burger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section id="accueil" class="hero">
+    <div class="hero-bg">
+      <img src="machine.png" alt="Laboratoire pharmaceutique" loading="eager">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <span class="hero-label">Conseil spécialisé — Industrie Pharmaceutique &amp; Biotechnologies</span>
+      <h1 class="hero-h1">Pharm<em>consult</em></h1>
+      <p class="hero-sub">Accompagnement stratégique &amp; opérationnel pour les industries pharmaceutiques, les acteurs de la biotechnologie et des dispositifs médicaux.</p>
+      <div class="hero-cta">
+        <a href="#expertise-industrielle" class="btn-teal"><span>Découvrir nos expertises</span></a>
+        <a href="#a-propos" class="btn-ghost">En savoir plus</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Défiler</span>
+      <div class="scroll-line"></div>
+    </div>
+    <div class="hero-decade">2026</div>
+  </section>
+
+  <!-- ── MARQUEE ── -->
+  <div class="marquee-band" aria-hidden="true">
+    <div class="marquee-track">
+      <span class="marquee-item">Assurance Qualité <span class="marquee-dot"></span></span>
+      <span class="marquee-item">BPDO <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Audits Fournisseurs <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Dispositifs Médicaux <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Gestion des Risques <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Data Integrity <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Biotechnologies <span class="marquee-dot"></span></span>
+      <span class="marquee-item">ICH Q9 <span class="marquee-dot"></span></span>
+      <span class="marquee-item">BPF / GMP <span class="marquee-dot"></span></span>
+      <span class="marquee-item">CAPA &amp; Déviations <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Assurance Qualité <span class="marquee-dot"></span></span>
+      <span class="marquee-item">BPDO <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Audits Fournisseurs <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Dispositifs Médicaux <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Gestion des Risques <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Data Integrity <span class="marquee-dot"></span></span>
+      <span class="marquee-item">Biotechnologies <span class="marquee-dot"></span></span>
+      <span class="marquee-item">ICH Q9 <span class="marquee-dot"></span></span>
+      <span class="marquee-item">BPF / GMP <span class="marquee-dot"></span></span>
+      <span class="marquee-item">CAPA &amp; Déviations <span class="marquee-dot"></span></span>
+    </div>
+  </div>
+
+  <!-- ── À PROPOS ── -->
+  <section id="a-propos" class="about">
+    <div class="divider"></div>
+    <div class="about-inner">
+      <div class="about-text">
+        <span class="sec-label reveal">À Propos</span>
+        <h2 class="sec-title reveal d1">Une expertise au cœur de <em>l'industrie pharmaceutique</em></h2>
+        <p class="reveal d2">Pharmconsult est une société de conseil spécialisée dans l'industrie pharmaceutique. Dans un secteur soumis à de fortes contraintes réglementaires, économiques et industrielles, nous accompagnons les industries pharmaceutiques, les acteurs de la biotechnologie et des dispositifs médicaux.</p>
+        <p class="reveal d2">Nous intervenons dans les secteurs de l'Assurance Qualité, du Contrôle Qualité, de la qualification / validation et dans le domaine des BPDO. Pharmconsult est là pour vous accompagner tout au long de vos projets.</p>
+        <p class="reveal d3">Nous couvrons des sujets aussi divers que les nouvelles technologies et approches thérapeutiques, la compréhension de la prise en charge des maladies et des parcours de soins.</p>
+        <div class="tags reveal d3">
+          <span class="tag">Assurance Qualité</span>
+          <span class="tag">Contrôle Qualité</span>
+          <span class="tag">BPDO</span>
+          <span class="tag">Validation</span>
+          <span class="tag">Biotechnologies</span>
+          <span class="tag">Dispositifs Médicaux</span>
+        </div>
+        <div class="stats-row reveal d4">
+          <div class="stat"><span class="stat-n">10+</span><span class="stat-l">Années d'expérience</span></div>
+          <div class="stat"><span class="stat-n">3</span><span class="stat-l">Secteurs couverts</span></div>
+          <div class="stat"><span class="stat-n">4</span><span class="stat-l">Offres de services</span></div>
+        </div>
+      </div>
+      <div class="about-visual reveal">
+        <div class="about-img-wrap">
+          <img src="joanna.png" alt="Laboratoire pharmaceutique" loading="lazy">
+          <div class="img-caption">
+            <span class="sub">Fondatrice</span>
+            <div class="name">Pharmacienne — 10 ans d'expérience</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EXPERTISE INDUSTRIELLE ── -->
+  <section id="expertise-industrielle" class="exp-indus">
+    <div class="divider"></div>
+    <div class="exp-inner">
+      <div class="exp-head">
+        <div>
+          <span class="sec-label reveal">Expertise Industrielle</span>
+          <h2 class="sec-title reveal d1">Solutions sur-mesure pour<br>chaque <em>défi réglementaire</em></h2>
+        </div>
+        <p class="exp-head-r reveal">Trois domaines d'intervention complémentaires pour l'industrie pharmaceutique et les laboratoires.</p>
+      </div>
+      <div class="cards-grid">
+
+        <div class="card reveal">
+          <div class="card-img">
+            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=700&q=80" alt="SMQ et Audits qualité" loading="lazy">
+            <div class="card-img-grad"></div>
+            <span class="card-num">Offre 01</span>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">Qualité • Conformité • Audits</span>
+            <h3 class="card-title">Système de Management de la Qualité &amp; Audits</h3>
+            <p class="card-desc">Optimisation du SMQ, rédaction des SOPs et audits pour une conformité ANSM, FDA, EMA.</p>
+            <div class="card-items">
+              <div class="card-item">Audits fournisseurs (CMO, API, packagings) et audits à blanc</div>
+              <div class="card-item">Gestion des déviations, CAPA, Change Control et backlog qualité</div>
+              <div class="card-item">Revues Annuelles de Qualité (PQR/APR)</div>
+            </div>
+            <div class="card-foot">
+              <a href="#contact" class="card-link">En savoir plus <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal d1">
+          <div class="card-img">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&q=80" alt="Gestion des risques" loading="lazy">
+            <div class="card-img-grad"></div>
+            <span class="card-num">Offre 02</span>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">Risques • Data Integrity • VSI</span>
+            <h3 class="card-title">Gestion des Risques &amp; Intégrité des Données</h3>
+            <p class="card-desc">Analyses de risques ICH Q9, audit documentaire et validation des systèmes informatisés.</p>
+            <div class="card-items">
+              <div class="card-item">Analyses de risques qualité (ICH Q9) et audits Data Integrity</div>
+              <div class="card-item">Audit systèmes documentaires papier et informatisés</div>
+              <div class="card-item">VSI — ERP, WMS, LIMS, Track &amp; Trace</div>
+            </div>
+            <div class="card-foot">
+              <a href="#contact" class="card-link">En savoir plus <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="card reveal d2">
+          <div class="card-img">
+            <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=700&q=80" alt="Formation et accompagnement" loading="lazy">
+            <div class="card-img-grad"></div>
+            <span class="card-num">Offre 03</span>
+          </div>
+          <div class="card-body">
+            <span class="card-tag">Formation • Conduite du changement</span>
+            <h3 class="card-title">Formation &amp; Accompagnement du Changement</h3>
+            <p class="card-desc">Modules de formation sur-mesure BPF/GMP pour ancrer une culture qualité durable.</p>
+            <div class="card-items">
+              <div class="card-item">Formations BPDO/BPF pour entrepôts, acheteurs et management</div>
+              <div class="card-item">Accompagnement pour ancrer la « Quality Culture »</div>
+              <div class="card-item">Montée en compétences des équipes terrain</div>
+            </div>
+            <div class="card-foot">
+              <a href="#contact" class="card-link">En savoir plus <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── EXPERTISE BPDO ── -->
+  <section id="expertise-bpdo" class="exp-bpdo">
+    <div class="divider"></div>
+    <div class="bpdo-inner">
+      <div class="bpdo-head reveal">
+        <span class="sec-label">Expertise BPDO</span>
+        <h2 class="sec-title">Pharmacien Responsable <em>Remplaçant BPDO</em></h2>
+      </div>
+      <div class="bpdo-feature reveal d1">
+        <div class="bpdo-img">
+          <img src="aide-personne-agées.png" alt="Distribution pharmaceutique" loading="lazy">
+          <div class="bpdo-img-overlay"></div>
+          <div class="bpdo-img-label">
+            <span>Offre 01</span>
+            <div>Distribution &amp; Suivi Patient</div>
+          </div>
+        </div>
+        <div class="bpdo-content">
+          <span class="offer-badge">Offre Exclusive BPDO</span>
+          <h2>Assurer la <em>continuité</em> de vos opérations BPDO</h2>
+          <p>Prise de fonction en tant que Pharmacien Responsable remplaçant — assurer la continuité de suivi des patients ainsi que des nouvelles prises en charge en l'absence du pharmacien responsable. Fluidifiez la prise en charge des patients en imaginant les parcours de soins de demain.</p>
+          <div class="bpdo-list">
+            <div class="bpdo-list-item">Audit complet de la chaîne de distribution — du stockage à la dispensation, nettoyage &amp; désinfection</div>
+            <div class="bpdo-list-item">Qualification des prestataires de transport (chaîne du froid) et montée en compétences des techniciens respiratoires</div>
+            <div class="bpdo-list-item">Rédaction et test des procédures de rappel de lots — exercices de simulation</div>
+            <div class="bpdo-list-item">Suivi des stupéfiants et psychotropes — sécurisation et suivi réglementaire</div>
+          </div>
+          <a href="#contact" class="btn-teal"><span>Prendre contact</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── NOTRE HISTOIRE ── -->
+  <section id="histoire" class="histoire">
+    <div class="divider"></div>
+    <div class="histoire-inner">
+      <div class="histoire-head">
+        <span class="sec-label reveal">Parcours</span>
+        <h2 class="sec-title reveal d1">Une trajectoire d'<em>excellence</em></h2>
+        <p class="reveal d2">Pharmacienne avec 10 années d'expérience en industrie pharmaceutique, je me lance en tant que prestataire pour vous apporter des solutions concrètes et vous accompagner dans vos projets.</p>
+      </div>
+      <div class="timeline">
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2015</div>
+          <div class="tl-body">
+            <h3 class="tl-title">Diplôme de Pharmacien — Spécialisation Assurance Qualité</h3>
+            <p class="tl-text">Pharmacienne diplômée avec une spécialisation en assurance qualité. Fondation d'une expertise réglementaire rigoureuse et maîtrise approfondie des Bonnes Pratiques de Fabrication.</p>
+          </div>
+        </div>
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2016</div>
+          <div class="tl-body">
+            <h3 class="tl-title">Premier CDI — Assurance Qualité en Industrie</h3>
+            <p class="tl-text">Rédaction des cahiers des charges avec les fournisseurs (API, dispositifs médicaux, transporteurs). Suivi des changements, réalisation des audits fournisseurs et suivi des plans CAPA.</p>
+          </div>
+        </div>
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2022</div>
+          <div class="tl-body">
+            <h3 class="tl-title">Pharmacien BPDO — Responsable Qualité Opérationnelle</h3>
+            <p class="tl-text">Suivi et prise en charge patients, conduite d'audits, responsable nettoyage &amp; désinfection, formation et montée en compétences des techniciens respiratoires.</p>
+          </div>
+        </div>
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <div class="tl-year">2026</div>
+          <div class="tl-body">
+            <h3 class="tl-title">Lancement de Pharmconsult</h3>
+            <p class="tl-text">Forte de 10 ans d'expérience en Assurance Qualité et en tant que Pharmacien Responsable BPDO, je propose désormais mes services en tant que prestataire indépendant pour vous accompagner au quotidien dans vos projets d'innovation et de développement.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CONTACT ── -->
+  <section id="contact" class="contact">
+    <div class="divider"></div>
+    <div class="contact-inner">
+      <div class="contact-l">
+        <span class="sec-label reveal">Contact</span>
+        <h2 class="sec-title reveal d1">Parlons de votre <em>projet</em></h2>
+        <p class="reveal d2">Vous avez un besoin réglementaire, une question qualité ou un projet en cours ? Contactez-moi pour un premier échange sans engagement.</p>
+        <div class="contact-info">
+          <div class="c-item reveal d2">
+            <div class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
+            <div class="c-txt"><strong>Email</strong><a href="mailto:joana.lahyani@gmail.com">joana.lahyani@gmail.com</a></div>
+          </div>
+          <div class="c-item reveal d3">
+            <div class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>
+            <div class="c-txt"><strong>Zone d'intervention</strong>France &amp; International</div>
+          </div>
+          <div class="c-item reveal d4">
+            <div class="c-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+            <div class="c-txt"><strong>Disponibilité</strong>Missions ponctuelles &amp; long terme</div>
+          </div>
+        </div>
+      </div>
+
+      <form class="contact-form reveal d2" id="cform" novalidate>
+        <div class="form-row">
+          <div class="f-group"><label for="fn">Prénom *</label><input type="text" id="fn" placeholder="Jean" required></div>
+          <div class="f-group"><label for="ln">Nom *</label><input type="text" id="ln" placeholder="Dupont" required></div>
+        </div>
+        <div class="f-group"><label for="em">Email professionnel *</label><input type="email" id="em" placeholder="j.dupont@entreprise.fr" required></div>
+        <div class="f-group"><label for="co">Société</label><input type="text" id="co" placeholder="Nom de votre entreprise"></div>
+        <div class="f-group">
+          <label for="sv">Service concerné</label>
+          <div class="sel-wrap">
+            <select id="sv">
+              <option value="" disabled selected>Sélectionner un service</option>
+              <option>Expertise BPDO — Pharmacien Responsable Remplaçant</option>
+              <option>Expertise Industrielle — SMQ &amp; Audits</option>
+              <option>Expertise Industrielle — Gestion des Risques &amp; Data Integrity</option>
+              <option>Expertise Industrielle — Formation &amp; Accompagnement</option>
+              <option>Autre</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-group"><label for="msg">Message *</label><textarea id="msg" placeholder="Décrivez votre besoin ou projet..." required></textarea></div>
+        <button type="submit" class="btn-teal"><span>Envoyer le message</span></button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="f-logo"><img src="logo.png" alt="Pharmconsult"></div>
+    <p class="f-copy">© 2026 Pharmconsult — Tous droits réservés</p>
+    <div class="f-links">
+      <a href="#accueil">Accueil</a>
+      <a href="#expertise-industrielle">Expertise</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+      updateActive();
+    }, { passive: true });
+
+    const secs = Array.from(document.querySelectorAll('section[id]'));
+    const lnks = document.querySelectorAll('.nav-lnk[data-s]');
+    function updateActive() {
+      const y = window.scrollY + 120;
+      let cur = '';
+      secs.forEach(s => { if (y >= s.offsetTop) cur = s.id; });
+      lnks.forEach(a => a.classList.toggle('active', a.dataset.s === cur));
+    }
+    updateActive();
+
+    window.addEventListener('load', () => document.querySelector('.hero').classList.add('ready'));
+
+    const ro = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+    document.getElementById('burger').addEventListener('click', () => document.getElementById('mob').classList.add('open'));
+    document.getElementById('mobClose').addEventListener('click', () => document.getElementById('mob').classList.remove('open'));
+    document.querySelectorAll('.mob-lnk').forEach(a => a.addEventListener('click', () => document.getElementById('mob').classList.remove('open')));
+
+    document.getElementById('cform').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const btn = e.target.querySelector('.btn-teal span');
+      btn.textContent = 'Message envoyé — Merci !';
+      e.target.querySelector('.btn-teal').style.opacity = '.7';
+      e.target.querySelector('.btn-teal').style.pointerEvents = 'none';
+    });
+  </script>
+</body>
+</html>
